@@ -28,6 +28,10 @@
         treefmt-nix.lib.evalModule nixpkgs.legacyPackages.${system} (
           { ... }:
           {
+            settings.global.excludes = [
+              "CHANGELOG.md"
+              ".github/release-please-manifest.json"
+            ];
             programs = {
               # keep-sorted start block=yes
               fish_indent.enable = true;
