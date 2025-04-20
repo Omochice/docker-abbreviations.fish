@@ -18,6 +18,7 @@
     {
       nixpkgs,
       treefmt-nix,
+      nur,
       ...
     }:
     let
