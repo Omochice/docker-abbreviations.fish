@@ -7,6 +7,11 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nur = {
+      url = "github:Omochice/nur-packages";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
   };
 
   outputs =
@@ -59,5 +64,24 @@
     in
     {
       formatter = forAllSystems (system: (treefmt system).config.build.wrapper);
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          check-action = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              actionlint
+              nur.packages.${system}.ghalint
+            ];
+          };
+          renovate = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              renovate
+            ];
+          };
+        }
+      );
     };
 }

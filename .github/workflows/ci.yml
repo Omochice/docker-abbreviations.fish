@@ -1,0 +1,89 @@
+name: Check codes
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  path-filter:
+    timeout-minutes: 5
+    outputs:
+      # keep-sorted start
+      actions: ${{steps.changes.outputs.actions}}
+      flake: ${{steps.changes.outputs.flake}}
+      renovate: ${{steps.changes.outputs.renovate}}
+      # keep-sorted end
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: changes
+        with:
+          filters: |
+            flake:
+              - flake.nix
+              - flake.lock
+            renovate:
+              - renovate.json5
+            actions:
+              - .github/workflows/*.yml
+              - .github/workflows/*.yaml
+  check-actions:
+    needs: path-filter
+    if: needs.path-filter.outputs.actions == 'true' || needs.path-filter.outputs.flake == 'true'
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install nix
+        uses: cachix/install-nix-action@02a151ada4993995686f9ed4f1be7cfbb229e56f # v31.0.0
+        with:
+          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: check actions
+        run: |
+          nix develop .#check-action -c actionlint --version
+          nix develop .#check-action -c actionlint
+          nix develop .#check-action -c ghalint --version
+          nix develop .#check-action -c ghalint run
+  check-renovate-config:
+    needs: path-filter
+    if: needs.path-filter.outputs.renovate == 'true' || needs.path-filter.outputs.flake == 'true'
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install nix
+        uses: cachix/install-nix-action@02a151ada4993995686f9ed4f1be7cfbb229e56f # v31.0.0
+        with:
+          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: Validate renovate config
+        run: nix develop .#renovate --command renovate-config-validator renovate.json5
+  status-check:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    needs:
+      - check-actions
+      - check-renovate-config
+    permissions: {}
+    if: failure()
+    steps:
+      - run: exit 1

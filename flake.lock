@@ -16,9 +16,33 @@
         "type": "github"
       }
     },
+    "nur": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1745132810,
+        "narHash": "sha256-YD65H97xY54rshiWf5bNQTect5sm0pMWEs7McnKpHPk=",
+        "owner": "Omochice",
+        "repo": "nur-packages",
+        "rev": "6dadddf483c39984c9a5deb86638eed95b5852d5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Omochice",
+        "repo": "nur-packages",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
+        "nur": "nur",
         "treefmt-nix": "treefmt-nix"
       }
     },
