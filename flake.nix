@@ -35,6 +35,7 @@
                 enable = true;
                 indent = 2;
               };
+              jsonfmt.enable = true;
               keep-sorted.enable = true;
               mdformat.enable = true;
               nixfmt.enable = true;
