@@ -1,5 +1,5 @@
 {
-  description = "Docker abbreviations for fish";
+  description = "Docker abbreviations for fish-shell";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
